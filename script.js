@@ -5,6 +5,13 @@
 // BANKIST APP
 
 // Data
+const account0 = {
+  owner: 'Jakhongir Abdukhamidov',
+  movements: [2000, 4500, -100, 3500, 700, 20000, -6000, -4300],
+  interestRate: 2, // %
+  pin: 1000,
+};
+
 const account1 = {
   owner: 'Jonas Schmedtmann',
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
@@ -33,7 +40,7 @@ const account4 = {
   pin: 4444,
 };
 
-const accounts = [account1, account2, account3, account4];
+const accounts = [account0, account1, account2, account3, account4];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -76,32 +83,31 @@ const displayMovements = function (movements) {
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
 };
-displayMovements(account1.movements);
 
 // Calculating and displaying the the current balance
 const displayBalance = function (movements) {
   const balance = movements.reduce((acc, mov) => acc + mov);
   labelBalance.textContent = `${balance} €`;
 };
-displayBalance(account1.movements);
 
-const displaySummary = function (movements) {
-  const income = movements
+const displaySummary = function (acct) {
+  const income = acct.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov);
   labelSumIn.textContent = income + '€';
 
-  const out = movements.filter(mov => mov < 0).reduce((acc, mov) => acc + mov);
+  const out = acct.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov);
   labelSumOut.textContent = Math.abs(out) + '€';
 
-  const interest = movements
+  const interest = acct.movements
     .filter(mov => mov > 0)
-    .map(mov => (mov * 1.2) / 100)
+    .map(mov => (mov * acct.interestRate) / 100)
     .filter(mov => mov >= 1)
     .reduce((acc, int) => acc + int, 0);
   labelSumInterest.textContent = `${interest}€`;
 };
-displaySummary(account1.movements);
 
 const createUsername = function (accs) {
   accs.forEach(function (acc) {
@@ -113,5 +119,35 @@ const createUsername = function (accs) {
   });
 };
 createUsername(accounts);
+
+// event handler
+let currentAccount;
+btnLogin.addEventListener('click', function (e) {
+  // to prevent form from submitting
+  e.preventDefault();
+
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value.trim()
+  );
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    // displaying UI and welcome message
+    labelWelcome.textContent = `Welcome back, ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+    containerApp.style.opacity = 100;
+
+    //clearing the input fields
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+
+    // Displaying Balance and Movements
+    displayBalance(currentAccount.movements);
+    displayMovements(currentAccount.movements);
+
+    // Displaying Summary with current Movements
+    displaySummary(currentAccount);
+  }
+});
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
