@@ -79,7 +79,7 @@ const displayMovements = function (movements, sort = false) {
               <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-              <div class="movements__value">${currentMov}€</div>
+              <div class="movements__value">${currentMov.toFixed(2)}€</div>
             </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
@@ -89,26 +89,26 @@ const displayMovements = function (movements, sort = false) {
 // Calculating and displaying the current balance
 const displayBalance = function (acct) {
   acct.balance = acct.movements.reduce((acc, mov) => acc + mov);
-  labelBalance.textContent = `${acct.balance} €`;
+  labelBalance.textContent = `${acct.balance.toFixed(2)} €`;
 };
 
 const displaySummary = function (acct) {
   const income = acct.movements
     .filter(mov => mov > 0)
     .reduce((acc, mov) => acc + mov);
-  labelSumIn.textContent = income + '€';
+  labelSumIn.textContent = income.toFixed(2) + '€';
 
   const out = acct.movements
     .filter(mov => mov < 0)
     .reduce((acc, mov) => acc + mov);
-  labelSumOut.textContent = Math.abs(out) + '€';
+  labelSumOut.textContent = Math.abs(out).toFixed(2) + '€';
 
   const interest = acct.movements
     .filter(mov => mov > 0)
     .map(mov => (mov * acct.interestRate) / 100)
     .filter(mov => mov >= 1)
     .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = `${interest}€`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 };
 
 const createUsername = function (accs) {
@@ -159,7 +159,7 @@ btnTransfer.addEventListener('click', function (e) {
   const receiverAcc = accounts.find(
     acc => acc.username === inputTransferTo.value
   );
-  const amount = Number(inputTransferAmount.value);
+  const amount = +inputTransferAmount.value;
   inputTransferAmount.value = inputTransferTo.value = '';
 
   if (
@@ -180,7 +180,7 @@ btnTransfer.addEventListener('click', function (e) {
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
 
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
 
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
     currentAccount.movements.push(amount);
