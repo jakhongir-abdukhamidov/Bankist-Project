@@ -277,12 +277,14 @@ btnLoan.addEventListener('click', function (e) {
   const amount = Math.floor(inputLoanAmount.value);
 
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
-    currentAccount.movements.push(amount);
-    currentAccount.movementsDates.push(new Date().toISOString());
-    updateUI(currentAccount);
-    inputLoanAmount.blur();
-    inputLoanAmount.value = '';
+    setTimeout(function () {
+      currentAccount.movements.push(amount);
+      currentAccount.movementsDates.push(new Date().toISOString());
+      updateUI(currentAccount);
+      inputLoanAmount.blur();
+    }, 2500);
   }
+  inputLoanAmount.value = '';
 });
 
 // close account functionality
