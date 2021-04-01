@@ -206,8 +206,34 @@ const updateUI = function (acc) {
   displaySummary(acc);
 };
 
-// event handler
-let currentAccount;
+const startLogoutTimer = function () {
+  const tick = function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+
+    labelTimer.textContent = `${min}:${sec}`;
+
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = 0;
+    }
+    time--;
+  };
+  let time = 120;
+
+  tick();
+
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
+// as soon user logs in start counting back
+
+// log out once it reaches 0
+
+// event handlers
+let currentAccount, timer;
 
 btnLogin.addEventListener('click', function (e) {
   // to prevent form from submitting
@@ -243,6 +269,9 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
 
+    if (timer) clearInterval(timer);
+    timer = startLogoutTimer();
+
     updateUI(currentAccount);
   }
 });
@@ -267,6 +296,8 @@ btnTransfer.addEventListener('click', function (e) {
     receiverAcc.movementsDates.push(new Date().toISOString());
     // Updating displayed balance movements
     updateUI(currentAccount);
+    clearInterval(timer);
+    timer = startLogoutTimer();
   }
 });
 
@@ -282,6 +313,10 @@ btnLoan.addEventListener('click', function (e) {
       currentAccount.movementsDates.push(new Date().toISOString());
       updateUI(currentAccount);
       inputLoanAmount.blur();
+
+      // reset timer
+      clearInterval(timer);
+      timer = startLogoutTimer();
     }, 2500);
   }
   inputLoanAmount.value = '';
