@@ -21,7 +21,7 @@ const account0 = {
     '2021-04-01T10:51:36.790Z',
   ],
   currency: 'EUR',
-  locale: 'pt-PT', // de-DE
+  locale: 'en-US', // de-DE
 };
 
 const account1 = {
@@ -104,7 +104,8 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const formatMovementDate = function (date) {
+// format dates for movements
+const formatMovementDate = function (date, locale) {
   const calcPassedDays = (date1, date2) =>
     Math.round(Math.abs(date1 - date2) / (1000 * 60 * 60 * 24));
 
@@ -113,10 +114,7 @@ const formatMovementDate = function (date) {
   if (daysPassed === 1) return 'Yesterday';
   if (daysPassed <= 7) return `${daysPassed} days ago`;
 
-  const day = `${date.getDate()}`.padStart(2, 0);
-  const month = `${date.getMonth()}`.padStart(2, 0);
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+  return Intl.DateTimeFormat(locale).format(date);
 };
 
 const displayMovements = function (acc, sort = false) {
@@ -128,7 +126,7 @@ const displayMovements = function (acc, sort = false) {
   movs.forEach(function (currentMov, i) {
     const date = new Date(acc.movementsDates[i]);
 
-    const displayDate = formatMovementDate(date);
+    const displayDate = formatMovementDate(date, acc.locale);
 
     const type = currentMov > 0 ? 'deposit' : 'withdrawal';
     const html = `
@@ -136,9 +134,9 @@ const displayMovements = function (acc, sort = false) {
             <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-            <div class="movements__date">${displayDate}</div>
-            <div class="movements__value">${currentMov.toFixed(2)}€</div>
-            </div>
+    <div class="movements__date">${displayDate}</div>
+    <div class="movements__value">${currentMov.toFixed(2)}€</div>
+    </div>
     `;
     containerMovements.insertAdjacentHTML('afterbegin', html);
   });
@@ -187,16 +185,9 @@ const updateUI = function (acc) {
   // Displaying Summary with current Movements
   displaySummary(acc);
 };
+
 // event handler
 let currentAccount;
-
-const now = new Date();
-const day = `${now.getDate()}`.padStart(2, 0);
-const month = `${now.getMonth()}`.padStart(2, 0);
-const year = now.getFullYear();
-const hour = `${now.getHours()}`.padStart(2, 0);
-const min = `${now.getMinutes()}`.padStart(2, 0);
-labelDate.textContent = `${day}/${month}/${year}, ${hour}: ${min}`;
 
 btnLogin.addEventListener('click', function (e) {
   // to prevent form from submitting
@@ -212,6 +203,21 @@ btnLogin.addEventListener('click', function (e) {
       currentAccount.owner.split(' ')[0]
     }`;
     containerApp.style.opacity = 100;
+
+    // create current date and time
+    const now = new Date();
+    // const locale = navigator.language;
+    const options = {
+      hour: 'numeric',
+      minute: 'numeric',
+      day: 'numeric',
+      month: 'numeric',
+      year: 'numeric',
+    };
+    labelDate.textContent = new Intl.DateTimeFormat(
+      currentAccount.locale,
+      options
+    ).format(now);
 
     //clearing the input fields
     inputLoginUsername.value = inputLoginPin.value = '';
